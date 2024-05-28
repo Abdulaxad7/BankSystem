@@ -26,13 +26,12 @@ func ShowCardMenu(userId int) {
 
 	case 2:
 		recentTransactions(userId)
+
 	case 3:
-		cardFullInfo(userId)
-	case 4:
 		payBills(userId)
-	case 5:
+	case 4:
 		createCard(userId)
-	case 6:
+	case 5:
 		removeCard(userId)
 	}
 
@@ -68,32 +67,56 @@ func cardBalance(userId int) {
 func recentTransactions(userId int) {
 	var err error
 	user := Card.UserCards(userId)
-	card := Card.UserTransaction(userId)
 
 	var cardNumber string
 
 	fmt.Println("Enter card number: ")
 	_, err = fmt.Fscanln(os.Stdin, &cardNumber)
+	c_n, _ := strconv.Atoi(cardNumber)
+	card := Card.UserTransaction(userId, c_n)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	for _, v := range user {
+		fmt.Println(v["CardNumber"], "   ", cardNumber)
 		if v["CardNumber"] == cardNumber {
+
 			for _, u := range card {
-				fmt.Printf("The transaction was on [%q] and the amount was [%q] \n", u["transaction_time"], u["transaction"])
+				fmt.Printf("The transaction was on [%s] and the amount was [%s] \n", u["Time"], u["Amount"])
 			}
 		}
 	}
+	time.Sleep(5 * time.Second)
 	ShowCardMenu(userId)
 
 }
 
-func cardFullInfo(userId int) {
-
-}
 func payBills(userId int) {
+	var receiver int
+	var err error
+	transaction := Card.Transaction{}
+	fmt.Println("Enter transaction card number: ")
+	_, err = fmt.Fscanln(os.Stdin, &transaction.TransactionCard)
+	fmt.Println("Enter transaction receiver card number: ")
+	_, err = fmt.Fscanln(os.Stdin, &receiver)
+	if size(receiver) != 16 {
+		fmt.Println("\033[1;31mCard Number must contain exactly 16 digits!!!\u001B[1;0m")
+		payBills(userId)
+	}
+	fmt.Println("Enter transaction amount: ")
+	_, err = fmt.Fscanln(os.Stdin, &transaction.TransactionAmount)
+	if err != nil {
+		log.Fatal(err)
+	}
+	transaction = Card.Transaction{
+		Id:                userId,
+		TransactionCard:   transaction.TransactionCard,
+		TransactionAmount: transaction.TransactionAmount,
+	}
+	transaction.InsertNewTransaction(transaction, receiver)
 
+	ShowCardMenu(userId)
 }
 func removeCard(userId int) {
 	//var err error
@@ -105,10 +128,9 @@ func anim() {
 	fmt.Print(" \033[1;32m——————————————————————————————————————————————————\n" +
 		" |  1)\t\t————————Card Balance————————\t  |\n" +
 		" |  2)\t    ————————Recent Transactions————————\t  |\n" +
-		" |  3)\t       ————————Card Full Info————————\t  |\n" +
-		" |  4)\t\t  ————————Pay Bills————————\t  |\n" +
-		" |  5) \t\t————————Add New Card———————— \t  |\n" +
-		" |  6) \t\t ————————Remove Card——————— \t  |\n" +
+		" |  3)\t\t  ————————Pay Bills————————\t  |\n" +
+		" |  4) \t\t————————Add New Card———————— \t  |\n" +
+		" |  5) \t\t ————————Remove Card——————— \t  |\n" +
 		" \033[1;32m——————————————————————————————————————————————————\033[1;0m\n",
 	)
 }
@@ -146,26 +168,39 @@ func createCard(userId int) {
 		CardThruDate: card.CardThruDate,
 		CardPassword: card.CardPassword,
 		CardBalance:  rand.Intn(10000),
-		CardExpenses: 0,
 	}
+	fmt.Println("\033[1;31mInserting new card...!!!\u001B[1;0m")
+	time.Sleep(5 * time.Second)
 	card.InsertCard(card)
+	ShowCardMenu(userId)
 }
 
 func showCards(userId int) {
 	user := Card.UserCards(userId)
-	fmt.Printf("\033[1;36m\t\tHi %s \n", user[1]["CardHolder"])
-	fmt.Print("\033[1;36m ~~~~~~~~~~~~~~~~~~~~~Your cards~~~~~~~~~~~~~~~~~~\n\n")
-	for _, card := range user {
-		fmt.Printf(" \033[1;32m——————————————————————————————————————————————————\n")
-		fmt.Printf(" |    \t\t\t\t\t\t  |\n")
-		fmt.Printf(" |    \t \033[1;42m      \033[1;0;32m\t\t\t\t\t  |\n")
-		fmt.Printf(" |    \t \033[1;42m      \033[1;0;32m\t\t\t\t\t  |\n")
+	if user != nil {
 
-		fmt.Printf(" |    \t\t\t%q\t  |\n", card["CardHolder"])
-		fmt.Printf(" |    \t\t\t\t%q  \t  |\n", card["CardThruDate"])
-		fmt.Printf(" |       %q	\t\t  |\n", card["CardNumber"])
-		fmt.Printf(" |    \t\t\t\t\t\t  |\n")
-		fmt.Printf(" \033[1;32m——————————————————————————————————————————————————\n")
+		fmt.Printf("\033[1;36m\t\tHi %s \n", user[0]["CardHolder"])
+		fmt.Print("\033[1;36m ~~~~~~~~~~~~~~~~~~~~~Your cards~~~~~~~~~~~~~~~~~~\n\n")
+		for _, card := range user {
+			fmt.Printf(" \033[1;32m——————————————————————————————————————————————————\n")
+			fmt.Printf(" |    \t\t\t\t\t\t  |\n")
+			fmt.Printf(" |    \t \033[1;42m      \033[1;0;32m\t\t\t\t\t  |\n")
+			fmt.Printf(" |    \t \033[1;42m      \033[1;0;32m\t\t\t\t\t  |\n")
 
+			fmt.Printf(" |    \t\t\t%q\t  |\n", card["CardHolder"])
+			fmt.Printf(" |    \t\t\t\t%q  \t  |\n", card["CardThruDate"])
+			fmt.Printf(" |       %q	\t\t  |\n", card["CardNumber"])
+			fmt.Printf(" |    \t\t\t\t\t\t  |\n")
+			fmt.Printf(" \033[1;32m——————————————————————————————————————————————————\n")
+		}
 	}
+}
+
+func size(d int) int {
+	count := 0
+	for d != 0 {
+		d /= 10
+		count++
+	}
+	return count
 }

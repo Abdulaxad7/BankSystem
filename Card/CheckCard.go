@@ -14,16 +14,16 @@ func UserCards(id int) []map[string]interface{} {
 	return selectCards(id)
 }
 
-func UserTransaction(id int) []map[string]interface{} {
-	return userTran(id)
+func UserTransaction(id, cardNumber int) []map[string]interface{} {
+	return userTran(id, cardNumber)
 }
 
-func userTran(id int) []map[string]interface{} {
-	const query = `SELECT user_card_transactions.transaction user_card_transactions.transaction_time
+func userTran(id, cardNumber int) []map[string]interface{} {
+	const query = `SELECT user_card_transactions.transaction, user_card_transactions.transaction_time
 	from user_card_data
 	INNER JOIN user_card_transactions ON user_card_transactions.id=user_card_data.id
-	WHERE user_card_data.id=$1`
-	stmt, err := db.Query(query, id)
+	WHERE user_card_data.card_number=$1`
+	stmt, err := db.Query(query, cardNumber)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -33,6 +33,7 @@ func userTran(id int) []map[string]interface{} {
 		err = stmt.Scan(&s[i], &s[i+1])
 		i += 2
 	}
+
 	var transactions []map[string]interface{}
 	insert := make(map[string]interface{})
 	for points := 0; points < cap(s); points += 2 {
@@ -40,11 +41,12 @@ func userTran(id int) []map[string]interface{} {
 			break
 		}
 		insert = map[string]interface{}{
-			"Id":   s[points],
-			"Time": s[points+1],
+			"Amount": s[points],
+			"Time":   s[points+1],
 		}
 		transactions = append(transactions, insert)
 	}
+
 	return transactions
 }
 

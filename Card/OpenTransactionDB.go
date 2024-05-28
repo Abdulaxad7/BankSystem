@@ -5,6 +5,13 @@ import (
 	"log"
 )
 
+type Transaction struct {
+	Id                int    `json:"id"`
+	TransactionCard   int    `json:"transaction-card"`
+	TransactionTime   string `json:"transaction-time"`
+	TransactionAmount int    `json:"transaction-amount"`
+}
+
 func OpenTransaction() {
 
 	const connStr = "postgres://postgres:secret@localhost:5435/bank?sslmode=disable"

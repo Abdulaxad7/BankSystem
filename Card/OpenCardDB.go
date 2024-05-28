@@ -12,9 +12,8 @@ type Card struct {
 	CardNumber   int    `json:"card_number"`
 	CardHolder   string `json:"card_holder"`
 	CardThruDate string `json:"card_thru_date"`
-	CardPassword int    `json:"card_password"`
+	CardPassword string `json:"card_password"`
 	CardBalance  int    `json:"card_balance"`
-	CardExpenses int    `json:"card_expenses"`
 }
 
 var db *sql.DB
@@ -31,7 +30,7 @@ func Open() {
     	Card_Holder varchar(25) not null,
 		Card_Thru_Date varchar(100) not null,
     	Password varchar(100) not null,
-    	Card_Balance varchar(100) not null,
+    	Card_Balance int,
 		Created timestamp default now()
 		)`
 	if err != nil {
