@@ -60,3 +60,21 @@ UPDATE  User_Card_Data
 	}
 	return true
 }
+func Remove(cardNumber int) {
+	var err error
+	const query = `delete from user_card_data where card_number=$1`
+	stmt, err := db.Prepare(query)
+	_, err = stmt.Exec(cardNumber)
+	if err != nil {
+		log.Fatal(err)
+	}
+	removeTransaction(cardNumber)
+}
+func removeTransaction(cardNumber int) {
+	const query = `delete from user_card_transactions where card_number=$1`
+	stmt, err := db.Prepare(query)
+	_, err = stmt.Exec(cardNumber)
+	if err != nil {
+		log.Fatal(err)
+	}
+}

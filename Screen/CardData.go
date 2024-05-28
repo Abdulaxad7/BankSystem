@@ -11,6 +11,8 @@ import (
 	"time"
 )
 
+var check = true
+
 func ShowCardMenu(userId int) {
 	var choice int
 	showCards(userId)
@@ -33,6 +35,8 @@ func ShowCardMenu(userId int) {
 		createCard(userId)
 	case 5:
 		removeCard(userId)
+	default:
+		ShowCardMenu(userId)
 	}
 
 }
@@ -119,8 +123,17 @@ func payBills(userId int) {
 	ShowCardMenu(userId)
 }
 func removeCard(userId int) {
-	//var err error
-	//fmt.Println("Enter card number to delete: ")
+	var cardNumber int
+
+	fmt.Println("Enter card number to remove from your wallet: ")
+	_, err := fmt.Fscanln(os.Stdin, &cardNumber)
+	if err != nil {
+		log.Fatal(err)
+	}
+	Card.Remove(cardNumber)
+	fmt.Printf("Removing card [%d]\n", cardNumber)
+	time.Sleep(5 * time.Second)
+	ShowCardMenu(userId)
 
 }
 
@@ -140,7 +153,7 @@ func createCard(userId int) {
 	var err error
 	var card Card.Card
 	fmt.Println("Enter Card Number: ")
-	//_, err = fmt.Fscanln(os.Stdin, &card.CardNumber)
+
 	if reader.Scan() {
 		card.CardNumber, err = strconv.Atoi(reader.Text())
 		if err != nil {
@@ -178,8 +191,11 @@ func createCard(userId int) {
 func showCards(userId int) {
 	user := Card.UserCards(userId)
 	if user != nil {
-
-		fmt.Printf("\033[1;36m\t\tHi %s \n", user[0]["CardHolder"])
+		if check {
+			fmt.Printf("\033[1;36m\t\tHi %s \n", user[0]["CardHolder"])
+			time.Sleep(5 * time.Second)
+			check = false
+		}
 		fmt.Print("\033[1;36m ~~~~~~~~~~~~~~~~~~~~~Your cards~~~~~~~~~~~~~~~~~~\n\n")
 		for _, card := range user {
 			fmt.Printf(" \033[1;32m——————————————————————————————————————————————————\n")

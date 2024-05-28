@@ -4,8 +4,8 @@ import "Library/Screen"
 
 func main() {
 
-	//Screen.Start()
-	Screen.ShowCardMenu(2310110)
+	Screen.Start()
+	//Screen.ShowCardMenu(2310110)
 	//for _, v := range Card.UserCards(2310110) {
 	//	fmt.Println(v)
 	//}

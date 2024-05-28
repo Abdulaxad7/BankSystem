@@ -70,6 +70,7 @@ func Create() {
 		Create()
 	}
 	user.CreateAccount(user)
+
 }
 
 func Login() {
